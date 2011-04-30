@@ -74,14 +74,6 @@ package
 				}else{
 					unattachedBlockDir = 0;
 				}
-				while(!FlxG.overlap(verticalTester, city)){
-					if(unattachedBlockDir==0){
-						unattachedBlock.reset(unattachedBlock.x-1, unattachedBlock.y);
-					}else{
-						unattachedBlock.reset(unattachedBlock.x+1, unattachedBlock.y);				
-					}
-					verticalTester.x = unattachedBlock.x;
-				}
 			}
 			verticalTester.x = unattachedBlock.x;
 			FlxG.overlap(city, missiles, function(cityBlock, missile){
