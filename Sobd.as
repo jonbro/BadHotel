@@ -3,7 +3,7 @@
 package {
 
 	import org.flixel.*; //Allows you to refer to flixel objects in your code
-	[SWF(width="960", height="640", backgroundColor="#96bcc7")] //Set the size and color of the Flash file
+	[SWF(width="960", height="640", backgroundColor="#000000")] //Set the size and color of the Flash file
 	[Frame(factoryClass="Preloader")]  //Tells flixel to use the default preloader
 
 	public class Sobd extends FlxGame

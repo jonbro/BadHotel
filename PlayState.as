@@ -11,27 +11,30 @@ package
 		public var unattachedBlock:CityBlock;
 		public var unattachedBlockDir:Number;
 		public var city:FlxGroup;
+		public var hq:HQBlock;
 		public var gridSize:Number;
 		
 		public var missilePeriod:Number;
 		public var blockPeriod:Number;
+
+		private var verticalTester:FlxSprite;
 		
 		override public function create():void
 		{
 			FlxG.bgColor = 0xff96bcc7;
 			
 			gridSize = 16;
-			missilePeriod = 3;
+			missilePeriod = 1;
 			blockPeriod = 10;
 			
 			missiles = new FlxGroup();
 			city = new FlxGroup();
 			// add the hq right in the center of the screen
 			var hq_center = Math.floor((FlxG.width/2)/gridSize)*gridSize;
-			var hq = new HQBlock(hq_center, FlxG.height-156)
+			hq = new HQBlock(hq_center, FlxG.height-156)
 			city.add(hq);
 			// add some missiles
-			var missile:Missile = new Missile(Math.random()*FlxG.width, -30, Math.random()*FlxG.width, FlxG.height, 20);
+			var missile:Missile = new Missile(Math.random()*FlxG.width, -30, Math.random()*FlxG.width, FlxG.height, Math.random()*30+50);
 			missiles.add(missile);
 			
 			add(city);
@@ -41,6 +44,11 @@ package
 			
 			add(unattachedBlock);
 			unattachedBlockDir = 0;
+			verticalTester = new FlxSprite(unattachedBlock.x, unattachedBlock.y);
+			verticalTester.width = unattachedBlock.width;
+			verticalTester.height = FlxG.height;
+			verticalTester.makeGraphic(verticalTester.width, verticalTester.height, 0x30FFFFFF)
+			add(verticalTester);;
 		}
 		override public function update():void
 		{
@@ -59,16 +67,32 @@ package
 			}else{
 				unattachedBlock.reset(unattachedBlock.x+1, unattachedBlock.y);				
 			}
-			if(unattachedBlock.x + unattachedBlock.width > FlxG.width || unattachedBlock.x < 0){
-				unattachedBlockDir = (unattachedBlockDir+1)%2
+			if(!FlxG.overlap(verticalTester, city)){
+				// move it back towards the hq
+				if(verticalTester.x < hq.x){
+					unattachedBlockDir = 1;
+				}else{
+					unattachedBlockDir = 0;
+				}
+				while(!FlxG.overlap(verticalTester, city)){
+					if(unattachedBlockDir==0){
+						unattachedBlock.reset(unattachedBlock.x-1, unattachedBlock.y);
+					}else{
+						unattachedBlock.reset(unattachedBlock.x+1, unattachedBlock.y);				
+					}
+					verticalTester.x = unattachedBlock.x;
+				}
 			}
+			verticalTester.x = unattachedBlock.x;
 			FlxG.overlap(city, missiles, function(cityBlock, missile){
 				missile.kill();
 				cityBlock.kill();
 			});
 			missilePeriod -= FlxG.elapsed;
 			if(missilePeriod < 0){
-				var missile = new Missile(Math.random()*FlxG.width, -30, Math.random()*FlxG.width, FlxG.height, 20);
+				//var missile = new Missile(Math.random()*FlxG.width, -30, Math.random()*FlxG.width, FlxG.height, Math.random()*30+50);
+				// shoot all of the missiles at the hq
+				var missile = new Missile(Math.random()*FlxG.width, -30, FlxG.width/2, FlxG.height, Math.random()*30+50);
 				missiles.add(missile);				
 				missilePeriod = 3;
 			}
