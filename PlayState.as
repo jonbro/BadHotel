@@ -5,7 +5,7 @@ package
 
 	public class PlayState extends FlxState		//The class declaration for the main game state
 	{
-		
+		[Embed(source="assets/background_mountins.png")] private var ImgBkg:Class; //The background image.
 		public var missiles:FlxGroup;
 		
 		public var unattachedBlock:CityBlock;
@@ -18,11 +18,16 @@ package
 		public var blockPeriod:Number;
 
 		private var verticalTester:FlxSprite;
+		private var vertDrop:Dropper;
 		
+		public var queue:BrickQueue;
 		override public function create():void
 		{
 			FlxG.bgColor = 0xff96bcc7;
 			
+			var bgSprite = new FlxSprite(0, 0, ImgBkg);
+			bgSprite.y = FlxG.height - bgSprite.height;
+			this.add(bgSprite);
 			gridSize = 16;
 			missilePeriod = 1;
 			blockPeriod = 10;
@@ -40,15 +45,20 @@ package
 			add(city);
 			add(missiles);
 			
-			unattachedBlock = new CityBlock(Math.floor((FlxG.width/2)/gridSize)*gridSize, 0, Math.floor(Math.random()*2)); //
+			queue = new BrickQueue();
+			add(queue);
 			
+			// should pack this up in a class that can be used for the other two sides, and that can be passed in the different blocks as they come up in the queue
+			unattachedBlock = new CityBlock(Math.floor((FlxG.width/2)/gridSize)*gridSize, 0, Math.floor(Math.random()*2)); //
 			add(unattachedBlock);
 			unattachedBlockDir = 0;
 			verticalTester = new FlxSprite(unattachedBlock.x, unattachedBlock.y);
 			verticalTester.width = unattachedBlock.width;
 			verticalTester.height = FlxG.height;
 			verticalTester.makeGraphic(verticalTester.width, verticalTester.height, 0x30FFFFFF)
-			add(verticalTester);;
+			/*add(verticalTester);*/
+			vertDrop = new Dropper(0, city, hq);
+			add(vertDrop);
 		}
 		override public function update():void
 		{
@@ -59,7 +69,13 @@ package
 			}
 			// drop the block from the top
 			if(FlxG.keys.justPressed("Z")){
-				addBlock(unattachedBlock.x, unattachedBlock.y, 3, unattachedBlock.blockType);
+				if(!vertDrop.hasBrick()){
+					queue.getBrick(vertDrop);					
+				}else{
+					addBlock(vertDrop.toDrop.x, vertDrop.toDrop.y, 3, vertDrop.toDrop);
+					vertDrop.remove(vertDrop.toDrop);
+					vertDrop.toDrop = null;
+				}
 			}
 			// move the unattached blocks back and forth
 			if(unattachedBlockDir==0){
@@ -92,14 +108,15 @@ package
 		}
 		public function addBlock(_x, _y, OverrideDir = false, defaultType = null):void
 		{
+			var block;
 			if(defaultType == null){
 				var blockType = Math.floor(Math.random()*2);				
+				block = new CityBlock(_x, _y, blockType);
 			}else{
-				var blockType = defaultType;
+				block = defaultType;
 			}
 			FlxG.log(defaultType);
 			// add new city block at this positionm
-			var block = new CityBlock(_x, _y, blockType);
 			// going to do this with a sort of DLA
 			var stuck:Boolean = false;
 			var lastPos = new Point(block.x, block.y);

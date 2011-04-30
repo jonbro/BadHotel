@@ -1,5 +1,6 @@
 // slightly off base defense
-
+// a 3 button realtime strategy tower defense brick game
+// http://www.colourlovers.com/palette/694737/Thought_Provoking
 package {
 
 	import org.flixel.*; //Allows you to refer to flixel objects in your code
@@ -17,7 +18,7 @@ package {
 			// which will give Flash the browser focus and let the keyboard work.
 			//Normally we would do this in say the main menu state or something,
 			// but FlxInvaders has no menu :P
-			FlxG.mouse.show();
+			// FlxG.mouse.show();
 		}
 	}
 }
