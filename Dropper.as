@@ -15,12 +15,22 @@ package
 		// storing the direction the slider is going in
 		private var moveDir:int;
 		
-		public function Dropper(rot:int, _city:FlxGroup, _hq:HQBlock)
+		// the rotation of the dropper
+		private var rot:int;
+		
+		public function Dropper(_rot:int, _city:FlxGroup, _hq:HQBlock)
 		{
 			city = _city;
 			hq = _hq;
+			rot = _rot;
 			switch (rot)
 			{
+				case 1: // if it is from the left
+				case 2: // or the right
+					intersectionTester = new FlxSprite(0, FlxG.height-20);
+					intersectionTester.width = FlxG.width;
+					intersectionTester.height = 10;
+					break;
 				default: // if it is vertical
 					intersectionTester = new FlxSprite(FlxG.width/2, 0);
 					intersectionTester.width = 10;
@@ -31,6 +41,49 @@ package
 			add(intersectionTester);
 		}
 		override public function update():void
+		{
+			switch (rot)
+			{
+				case 1:
+				case 2:
+					vertUpdate();
+					break;
+				default:
+					horiUpdate();
+					break;
+			}
+			if(toDrop!=null){
+				intersectionTester.makeGraphic(intersectionTester.width, intersectionTester.height, 0x30FFFFFF)
+				if(rot == 0 || rot == 1){
+					toDrop.x = intersectionTester.x;
+				}else{
+					toDrop.x = FlxG.width-toDrop.width;
+				}
+				toDrop.y = intersectionTester.y;
+			}
+			super.update();
+		}
+		public function vertUpdate():void
+		{
+			// this is for the horizontal one
+			if(moveDir==0){
+				intersectionTester.reset(intersectionTester.x, intersectionTester.y-1);
+			}else{
+				intersectionTester.reset(intersectionTester.x, intersectionTester.y+1);				
+			}
+			if(!FlxG.overlap(intersectionTester, city) || intersectionTester.y < 0 || intersectionTester.y + intersectionTester.height > FlxG.height ){
+				// move it back towards the hq
+				if(intersectionTester.y < hq.y){
+					moveDir = 1;
+				}else{
+					moveDir = 0;
+				}
+			}
+			if(toDrop!=null){
+				intersectionTester.height = toDrop.height;
+			}
+		}
+		public function horiUpdate():void
 		{
 			// this is for the horizontal one
 			if(moveDir==0){
@@ -48,9 +101,6 @@ package
 			}
 			if(toDrop!=null){
 				intersectionTester.width = toDrop.width;
-				intersectionTester.makeGraphic(intersectionTester.width, intersectionTester.height, 0x30FFFFFF)
-				toDrop.x = intersectionTester.x;
-				toDrop.y = intersectionTester.y;
 			}
 		}
 		public function hasBrick():Boolean

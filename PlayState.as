@@ -17,8 +17,9 @@ package
 		public var missilePeriod:Number;
 		public var blockPeriod:Number;
 
-		private var verticalTester:FlxSprite;
 		private var vertDrop:Dropper;
+		private var leftDrop:Dropper;
+		private var rightDrop:Dropper;
 		
 		public var queue:BrickQueue;
 		override public function create():void
@@ -48,17 +49,12 @@ package
 			queue = new BrickQueue();
 			add(queue);
 			
-			// should pack this up in a class that can be used for the other two sides, and that can be passed in the different blocks as they come up in the queue
-			unattachedBlock = new CityBlock(Math.floor((FlxG.width/2)/gridSize)*gridSize, 0, Math.floor(Math.random()*2)); //
-			add(unattachedBlock);
-			unattachedBlockDir = 0;
-			verticalTester = new FlxSprite(unattachedBlock.x, unattachedBlock.y);
-			verticalTester.width = unattachedBlock.width;
-			verticalTester.height = FlxG.height;
-			verticalTester.makeGraphic(verticalTester.width, verticalTester.height, 0x30FFFFFF)
-			/*add(verticalTester);*/
 			vertDrop = new Dropper(0, city, hq);
 			add(vertDrop);
+			leftDrop = new Dropper(1, city, hq);
+			add(leftDrop);
+			rightDrop = new Dropper(2, city, hq);
+			add(rightDrop);
 		}
 		override public function update():void
 		{
@@ -67,44 +63,39 @@ package
 				addBlock(Math.floor((FlxG.width/2)/gridSize)*gridSize, 0);
 				unattachedBlock = new CityBlock(Math.floor((FlxG.width/2)/gridSize)*gridSize, 0, Math.floor(Math.random()*2)); //
 			}
+
 			// drop the block from the top
 			if(FlxG.keys.justPressed("Z")){
-				if(!vertDrop.hasBrick()){
-					queue.getBrick(vertDrop);					
-				}else{
-					addBlock(vertDrop.toDrop.x, vertDrop.toDrop.y, 3, vertDrop.toDrop);
-					vertDrop.remove(vertDrop.toDrop);
-					vertDrop.toDrop = null;
-				}
+				dropPressed(leftDrop, 0)
 			}
-			// move the unattached blocks back and forth
-			if(unattachedBlockDir==0){
-				unattachedBlock.reset(unattachedBlock.x-1, unattachedBlock.y);
-			}else{
-				unattachedBlock.reset(unattachedBlock.x+1, unattachedBlock.y);				
+			if(FlxG.keys.justPressed("X")){
+				dropPressed(vertDrop, 3)
 			}
-			if(!FlxG.overlap(verticalTester, city)){
-				// move it back towards the hq
-				if(verticalTester.x < hq.x){
-					unattachedBlockDir = 1;
-				}else{
-					unattachedBlockDir = 0;
-				}
+			if(FlxG.keys.justPressed("C")){
+				dropPressed(rightDrop, 1)
 			}
-			verticalTester.x = unattachedBlock.x;
 			FlxG.overlap(city, missiles, function(cityBlock, missile){
 				missile.kill();
 				cityBlock.kill();
 			});
 			missilePeriod -= FlxG.elapsed;
 			if(missilePeriod < 0){
-				//var missile = new Missile(Math.random()*FlxG.width, -30, Math.random()*FlxG.width, FlxG.height, Math.random()*30+50);
 				// shoot all of the missiles at the hq
 				var missile = new Missile(Math.random()*FlxG.width, -30, FlxG.width/2, FlxG.height, Math.random()*30+50);
 				missiles.add(missile);				
 				missilePeriod = 3;
 			}
 			super.update();
+		}
+		public function dropPressed(dropper, dir)
+		{
+			if(!dropper.hasBrick()){
+				queue.getBrick(dropper);					
+			}else{
+				addBlock(dropper.toDrop.x, dropper.toDrop.y, dir, dropper.toDrop);
+				dropper.remove(dropper.toDrop);
+				dropper.toDrop = null;
+			}			
 		}
 		public function addBlock(_x, _y, OverrideDir = false, defaultType = null):void
 		{
@@ -115,14 +106,13 @@ package
 			}else{
 				block = defaultType;
 			}
-			FlxG.log(defaultType);
 			// add new city block at this positionm
 			// going to do this with a sort of DLA
 			var stuck:Boolean = false;
 			var lastPos = new Point(block.x, block.y);
 			do{
 				lastPos = new Point(block.x, block.y);
-				if(!OverrideDir){
+				if(OverrideDir === false){
 					var dir = Math.floor(Math.random()*3);
 				}else{
 					var dir = OverrideDir;

@@ -59,9 +59,8 @@ package
 					buildTimeRemaining[i].health = 3;
 					// place at the end of the array (this is the point where it should be loaded with the upcoming brick)
 					var theOneWeUsed = buildTimeRemaining.splice(i, 1);
-					buildTimeRemaining.splice(2, 0, theOneWeUsed);
+					buildTimeRemaining.splice(2, 0, theOneWeUsed[0]);
 					orderCountDowns();
-					FlxG.log(buildTimeRemaining);
 					break;
 				}
 			}
@@ -69,7 +68,7 @@ package
 		public function orderCountDowns(){
 			for (var i:int = 0; i < numUpcoming; i++)
 			{
-				buildTimeRemaining[i].y = pos.y+5+i*32;
+				buildTimeRemaining[i].reset(buildTimeRemaining[i].x, pos.y+5+i*32);
 			}
 		}
 	}
