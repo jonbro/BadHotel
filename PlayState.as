@@ -6,7 +6,8 @@ package
 	public class PlayState extends FlxState		//The class declaration for the main game state
 	{
 		[Embed(source="assets/background_mountins.png")] private var ImgBkg:Class; //The background image.
-		[Embed(source="assets/explosion.png")] private var ImgExplosion:Class
+		[Embed(source="assets/explosion.png")] private var ImgExplosion:Class;
+		[Embed(source="assets/bad_hotel.mp3")] 	public var MusicMain:Class;
 		public var missiles:FlxGroup;
 		
 		public var city:FlxGroup;
@@ -24,7 +25,8 @@ package
 		public var gameArea:FlxRect; // to store the playable area
 		
 		protected var Explosion:FlxEmitter;	
-		
+		protected var _fading:Boolean;
+		protected var _score:Number;
 		override public function create():void
 		{
 			gameArea = new FlxRect(0, 0, FlxG.width, 565);
@@ -67,7 +69,9 @@ package
 			add(leftDrop);
 			rightDrop = new Dropper(2, city, hq);
 			add(rightDrop);
-			
+			FlxG.playMusic(MusicMain);
+			_score = 0;
+			FlxG.watch(FlxG, "score")			
 		}
 		override public function update():void
 		{
@@ -86,13 +90,25 @@ package
 				cityBlock.kill();
 			});
 			missilePeriod -= FlxG.elapsed;
+			_score += FlxG.elapsed;
 			if(missilePeriod < 0){
 				// shoot all of the missiles at the hq
 				var missile = new Missile(Math.random()*FlxG.width, -30, FlxG.width/2, gameArea.height, Math.random()*30+50);
 				missiles.add(missile);				
 				missilePeriod = 3;
 			}
+			if(hq.dying){
+				//Fade out to victory screen stuffs
+				_fading = true;
+				FlxG.score = _score;
+				FlxG.fade(0xff542437,3,onDeath);
+			}
 			super.update();
+		}
+		public function onDeath()
+		{
+			FlxG.music.stop();
+			FlxG.switchState(new DeathState());
 		}
 		public function dropPressed(dropper, dir)
 		{

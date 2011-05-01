@@ -5,6 +5,7 @@ package
 	public class CityBlock extends FlxSprite		//Class declaration for the squid monster class
 	{
 		[Embed(source="assets/defense_block.png")] private var ImgDefenseBlock:Class;	
+		[Embed(source="assets/defense_block_tall.png")] private var ImgTallBlock:Class;	
 		[Embed(source="assets/wide_block.png")] private var ImgWideBlock:Class;	
 		
 		public var cityParent;
@@ -20,8 +21,10 @@ package
 			blockType = bType;
 			if(bType == 0){
 				loadGraphic(ImgDefenseBlock);	//Load this animated graphic file				
-			}else{
+			}else if(bType==1){
 				loadGraphic(ImgWideBlock);	//Load this animated graphic file				
+			}else{
+				loadGraphic(ImgTallBlock);	//Load this animated graphic file								
 			}
 			dying = false;
 			_explosion = Explosion;

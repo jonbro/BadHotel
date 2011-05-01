@@ -11,7 +11,7 @@ package {
 	{
 		public function Sobd():void
 		{
-			super(960,640,PlayState,1); //Create a new FlxGame object at 320x240 with 2x pixels, then load PlayState
+			super(960,640,HelpState,1); //Create a new FlxGame object at 320x240 with 2x pixels, then load PlayState
 			forceDebugger = true;
 
 			//Here we are just displaying the cursor to encourage people to click the game,

@@ -40,7 +40,7 @@ package
 				if(buildTimeRemaining[i-1]!=null){
 					x_pos+=buildTimeRemaining[i-1].x+buildTimeRemaining[i-1].width+130;
 				}
-				buildTimeRemaining[i] = new CityBlock(x_pos, pos.y, _explosion, Math.floor(Math.random()*2));
+				buildTimeRemaining[i] = new CityBlock(x_pos, pos.y, _explosion, Math.floor(Math.random()*3));
 				buildTimeRemaining[i].y = _txtNext.height/2-buildTimeRemaining[i].height/2+_txtNext.y;
 				buildTimeRemaining[i].health = 0;
 				add(buildTimeRemaining[i]);
@@ -75,7 +75,7 @@ package
 					remove(waiting.toDrop);
 					remove(buildTimeRemainingBars[i]);
 					
-					buildTimeRemaining[i] = new CityBlock(0,0, _explosion, Math.floor(Math.random()*2));
+					buildTimeRemaining[i] = new CityBlock(0,0, _explosion, Math.floor(Math.random()*3));
 					
 					add(buildTimeRemaining[i]);
 					waiting.add(waiting.toDrop);
