@@ -6,10 +6,9 @@ package
 	public class PlayState extends FlxState		//The class declaration for the main game state
 	{
 		[Embed(source="assets/background_mountins.png")] private var ImgBkg:Class; //The background image.
+		[Embed(source="assets/explosion.png")] private var ImgExplosion:Class
 		public var missiles:FlxGroup;
 		
-		public var unattachedBlock:CityBlock;
-		public var unattachedBlockDir:Number;
 		public var city:FlxGroup;
 		public var hq:HQBlock;
 		public var gridSize:Number;
@@ -22,31 +21,44 @@ package
 		private var rightDrop:Dropper;
 		
 		public var queue:BrickQueue;
+		public var gameArea:FlxRect; // to store the playable area
+		
+		protected var Explosion:FlxEmitter;	
+		
 		override public function create():void
 		{
+			gameArea = new FlxRect(0, 0, FlxG.width, 565);
+			
 			FlxG.bgColor = 0xff96bcc7;
 			
 			var bgSprite = new FlxSprite(0, 0, ImgBkg);
-			bgSprite.y = FlxG.height - bgSprite.height;
 			this.add(bgSprite);
 			gridSize = 16;
 			missilePeriod = 1;
 			blockPeriod = 10;
+
+			Explosion = new FlxEmitter();
+			Explosion.setXSpeed(-150,150);
+			Explosion.setYSpeed(-200,0);
+			Explosion.setRotation(-720,-720);
+			Explosion.gravity = 350;
+			Explosion.bounce = 0.5;
+			Explosion.makeParticles(ImgExplosion,100,10,true,0);
+			
+			add(Explosion);
 			
 			missiles = new FlxGroup();
 			city = new FlxGroup();
 			// add the hq right in the center of the screen
-			var hq_center = Math.floor((FlxG.width/2)/gridSize)*gridSize;
-			hq = new HQBlock(hq_center, FlxG.height-156)
+			var hq_center = FlxG.width/2-24;
+			hq = new HQBlock(hq_center, gameArea.height-156, Explosion)
 			city.add(hq);
-			// add some missiles
-			var missile:Missile = new Missile(Math.random()*FlxG.width, -30, Math.random()*FlxG.width, FlxG.height, Math.random()*30+50);
-			missiles.add(missile);
 			
 			add(city);
 			add(missiles);
+
 			
-			queue = new BrickQueue();
+			queue = new BrickQueue(Explosion);
 			add(queue);
 			
 			vertDrop = new Dropper(0, city, hq);
@@ -55,16 +67,11 @@ package
 			add(leftDrop);
 			rightDrop = new Dropper(2, city, hq);
 			add(rightDrop);
+			
 		}
 		override public function update():void
 		{
-			if(FlxG.keys.justPressed("SPACE"))
-			{
-				addBlock(Math.floor((FlxG.width/2)/gridSize)*gridSize, 0);
-				unattachedBlock = new CityBlock(Math.floor((FlxG.width/2)/gridSize)*gridSize, 0, Math.floor(Math.random()*2)); //
-			}
-
-			// drop the block from the top
+			// left top right
 			if(FlxG.keys.justPressed("Z")){
 				dropPressed(leftDrop, 0)
 			}
@@ -81,7 +88,7 @@ package
 			missilePeriod -= FlxG.elapsed;
 			if(missilePeriod < 0){
 				// shoot all of the missiles at the hq
-				var missile = new Missile(Math.random()*FlxG.width, -30, FlxG.width/2, FlxG.height, Math.random()*30+50);
+				var missile = new Missile(Math.random()*FlxG.width, -30, FlxG.width/2, gameArea.height, Math.random()*30+50);
 				missiles.add(missile);				
 				missilePeriod = 3;
 			}
@@ -131,15 +138,13 @@ package
 				}
 				block.reset(block.x, block.y);
 				// keep the block on the screen
-				block.x = Math.max(0, Math.min(FlxG.width, block.x))
-				block.y = Math.max(0, Math.min(FlxG.height-block.height, block.y))
 				if(FlxG.overlap(block, city, function(newBlock, cityBlock){
 					// we need to store the existing city block on the new block so that if it is destroyed, the new block falls
 					newBlock.cityParent = cityBlock;
 				})){
 					stuck = true;
 				}
-			}while(!stuck && block.y + block.height < FlxG.height);
+			}while(!stuck && block.y + block.height < gameArea.height && block.x < gameArea.width && block.x > 0);
 			if(stuck){
 				block.x = lastPos.x; block.y = lastPos.y;
 				city.add(block);

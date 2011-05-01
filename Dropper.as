@@ -23,18 +23,19 @@ package
 			city = _city;
 			hq = _hq;
 			rot = _rot;
+			var playState = FlxG.state as PlayState;
 			switch (rot)
 			{
 				case 1: // if it is from the left
 				case 2: // or the right
-					intersectionTester = new FlxSprite(0, FlxG.height-20);
+					intersectionTester = new FlxSprite(0, playState.gameArea.height-20);
 					intersectionTester.width = FlxG.width;
 					intersectionTester.height = 10;
 					break;
 				default: // if it is vertical
 					intersectionTester = new FlxSprite(FlxG.width/2, 0);
 					intersectionTester.width = 10;
-					intersectionTester.height = FlxG.height;
+					intersectionTester.height = playState.gameArea.height;
 					break;
 			}
 			intersectionTester.makeGraphic(intersectionTester.width, intersectionTester.height, 0x30FFFFFF)
@@ -65,13 +66,15 @@ package
 		}
 		public function vertUpdate():void
 		{
+			var playState = FlxG.state as PlayState;
+			
 			// this is for the horizontal one
 			if(moveDir==0){
 				intersectionTester.reset(intersectionTester.x, intersectionTester.y-1);
 			}else{
 				intersectionTester.reset(intersectionTester.x, intersectionTester.y+1);				
 			}
-			if(!FlxG.overlap(intersectionTester, city) || intersectionTester.y < 0 || intersectionTester.y + intersectionTester.height > FlxG.height ){
+			if(!FlxG.overlap(intersectionTester, city) || intersectionTester.y < 0 || intersectionTester.y + intersectionTester.height > playState.gameArea.height ){
 				// move it back towards the hq
 				if(intersectionTester.y < hq.y){
 					moveDir = 1;

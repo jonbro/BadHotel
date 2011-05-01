@@ -9,27 +9,47 @@ package
 		
 		public var cityParent;
 		public var blockType:int;
-
-		public function CityBlock(X:int, Y:int, bType:int = 0)
+		public var deathTime:Number;
+		public var dying:Boolean;
+		
+		protected var _explosion:FlxEmitter;	
+		
+		public function CityBlock(X:int, Y:int, Explosion:FlxEmitter, bType:int = 0)
 		{
 			super(X, Y);
 			blockType = bType;
-			FlxG.log(blockType);
 			if(bType == 0){
 				loadGraphic(ImgDefenseBlock);	//Load this animated graphic file				
 			}else{
 				loadGraphic(ImgWideBlock);	//Load this animated graphic file				
 			}
+			dying = false;
+			_explosion = Explosion;
 		}
 		override public function update():void
 		{
-			if(cityParent != null && !cityParent.alive){
-				acceleration.y = 200;
+			if(cityParent != null && cityParent.dying && !dying){
 				solid = false;
+				deathTime = cityParent.deathTime+0.3;
+				dying = true;
 				// start a death timer
 				// fire out a bunch of smoke an flame		
 			}
+			if(dying){
+				acceleration.y = 200;
+				deathTime -= FlxG.elapsed;
+				if(deathTime < 0){
+					_explosion.at(this);
+					_explosion.start(true,3,0,20);
+					super.kill();
+				}
+			}
 			super.update();
+		}
+		override public function kill():void
+		{
+			dying = true;
+			deathTime = .3;
 		}
 	}
 }
