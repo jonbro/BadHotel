@@ -7,7 +7,8 @@ package
 		[Embed(source="assets/defense_block.png")] private var ImgDefenseBlock:Class;	
 		[Embed(source="assets/defense_block_tall.png")] private var ImgTallBlock:Class;	
 		[Embed(source="assets/wide_block.png")] private var ImgWideBlock:Class;	
-		
+		[Embed(source="assets/Explosion.mp3")] public var SndExplode:Class;
+	  
 		public var cityParent;
 		public var blockType:int;
 		public var deathTime:Number;
@@ -35,14 +36,13 @@ package
 				solid = false;
 				deathTime = cityParent.deathTime+0.3;
 				dying = true;
-				// start a death timer
-				// fire out a bunch of smoke an flame		
 			}
 			if(dying){
 				acceleration.y = 200;
 				deathTime -= FlxG.elapsed;
 				if(deathTime < 0){
 					_explosion.at(this);
+					FlxG.play(SndExplode);
 					_explosion.start(true,3,0,20);
 					super.kill();
 				}

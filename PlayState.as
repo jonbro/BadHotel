@@ -8,6 +8,7 @@ package
 		[Embed(source="assets/background_mountins.png")] private var ImgBkg:Class; //The background image.
 		[Embed(source="assets/explosion.png")] private var ImgExplosion:Class;
 		[Embed(source="assets/bad_hotel.mp3")] 	public var MusicMain:Class;
+		[Embed(source="assets/Attach.mp3")] public var SndAttach:Class;
 		public var missiles:FlxGroup;
 		
 		public var city:FlxGroup;
@@ -107,7 +108,7 @@ package
 		}
 		public function onDeath()
 		{
-			FlxG.music.stop();
+			FlxG.music.fadeOut(2);
 			FlxG.switchState(new DeathState());
 		}
 		public function dropPressed(dropper, dir)
@@ -164,6 +165,7 @@ package
 			if(stuck){
 				block.x = lastPos.x; block.y = lastPos.y;
 				city.add(block);
+				FlxG.play(SndAttach);
 			}
 		}
 	}
